@@ -1,0 +1,5 @@
+sudo cloud-init clean
+sudo cloud-init init
+sudo cloud-init modules --mode=final
+
+/var/log/cloud-init-output.log
