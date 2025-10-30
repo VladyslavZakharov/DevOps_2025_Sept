@@ -1,0 +1,9 @@
+.vscode
+*.tfstate
+*.terraform
+*.terraform.lock.*
+*.terraform.tfstate
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.*
+.terraform.tfstate.lock.info
