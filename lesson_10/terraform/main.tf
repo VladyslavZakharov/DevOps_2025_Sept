@@ -16,16 +16,26 @@ provider "aws" {
   region = "us-east-1"
 }
 
+output "instance_public_ip" {
+  description = "The public IP address of the EC2 instance"
+  value       = aws_instance.test_t3_micro.public_ip
+}
+
+output "instance_public_dns" {
+  description = "The public DNS of the EC2 instance"
+  value       = aws_instance.test_t3_micro.public_dns
+}
+
 resource "aws_instance" "test_t3_micro" {
   ami                    = "ami-0bdd88bd06d16ba03" # Amazon Linux 2023
   instance_type          = "t3.micro"              # Free tier
   vpc_security_group_ids = [aws_security_group.web-sg.id]
   user_data              = <<-EOF
     #!/bin/bash
-    sudo apt-get update
-    sudo apt-get install -y apache2
-    sudo systemctl start apache2
-    sudo systemctl enable apache2
+    sudo dnf update
+    sudo dnf install -y httpd
+    sudo systemctl start httpd.service
+    sudo systemctl enable httpd.service
     sudo bash -c 'cat > /var/www/html/index.html' <<EOF_HTML
     <!DOCTYPE html>
     <html>
@@ -65,13 +75,4 @@ resource "aws_security_group" "web-sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-output "instance_public_ip" {
-  description = "The public IP address of the EC2 instance"
-  value       = aws_instance.test_t3_micro.public_ip
-}
-
-output "instance_public_dns" {
-  description = "The public DNS of the EC2 instance"
-  value       = aws_instance.test_t3_micro.public_dns
 }
