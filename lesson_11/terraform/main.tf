@@ -1,4 +1,12 @@
 terraform {
+  backend "s3" {
+    bucket         = "pasv-course-iskrobot-tf-state" # REPLACE WITH YOUR BUCKET NAME
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-locking"
+    encrypt        = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -13,17 +21,15 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
 }
 
-output "instance_public_ip" {
-  description = "The public IP address of the EC2 instance"
-  value       = aws_instance.test_t3_micro.public_ip
-}
-
-output "instance_public_dns" {
-  description = "The public DNS of the EC2 instance"
-  value       = aws_instance.test_t3_micro.public_dns
+locals {
+  common_tags = {
+    Environment = var.environment
+    Project     = "MyApplication"
+    ManagedBy   = "Terraform"
+  }
 }
 
 resource "aws_instance" "test_t3_micro" {
@@ -54,9 +60,12 @@ resource "aws_instance" "test_t3_micro" {
     </html>
     EOF_HTML
   EOF
-  tags = {
-    Name = "HelloWorld Server"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "HelloWorld Server"
+    }
+  )
 }
 
 resource "random_pet" "sg" {}
@@ -69,11 +78,21 @@ resource "aws_security_group" "web-sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  ingress {
+  egress {
     from_port   = 22
     to_port     = 9001
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = local.common_tags
+}
+
+output "instance_public_ip" {
+  description = "The public IP address of the EC2 instance"
+  value       = aws_instance.test_t3_micro.public_ip
+}
+
+output "instance_public_dns" {
+  description = "The public DNS of the EC2 instance"
+  value       = aws_instance.test_t3_micro.public_dns
 }
