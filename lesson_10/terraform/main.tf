@@ -53,7 +53,7 @@ resource "random_pet" "sg" {}
 
 resource "aws_security_group" "web-sg" {
   name = "${random_pet.sg.id}-sg"
-  ingress {
+  ngress {
     from_port   = 22
     to_port     = 9001
     protocol    = "tcp"
