@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket         = "pasv-course-iskrobot-tf-state" # REPLACE WITH YOUR BUCKET NAME
-    key            = "terraform.tfstate"
+    key            = "backend/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-state-locking"
     encrypt        = true
@@ -20,6 +20,10 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
+  lifecycle {
+    prevent_destroy = true
+  }
+
   bucket        = "pasv-course-iskrobot-tf-state" # REPLACE WITH YOUR BUCKET NAME
   force_destroy = true
 }
